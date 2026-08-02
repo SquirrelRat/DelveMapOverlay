@@ -302,4 +302,45 @@ public static class NodeBackbone
         "Gems", "Harbinger", "Hidden Path", "Jewellery", "Legion", "Lightning", "Loot",
         "Mana/Curse", "Maps", "Minion/Aura", "Physical", "Strongboxes", "Talismans", "Weapons",
     };
+
+    // -------------------------------------------------------------------------------
+    // Fossils. Two layers: node-exclusive fossils (6 specific nodes always drop one named
+    // fossil regardless of biome) and per-biome fossil pools (a fossil node in a biome
+    // drops from that biome's pool). Node-exclusive takes priority for display.
+    // -------------------------------------------------------------------------------
+
+    /// <summary>Node display name -> guaranteed exclusive fossil drop (from poedb/wiki).</summary>
+    private static readonly Dictionary<string, string> NodeExclusiveFossil = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Crystal Spire"] = "Hollow",
+        ["Time-Lost Cavern"] = "Glyphic",
+        ["Molten Cavity"] = "Faceted",
+        ["Humid Fissure"] = "Fractured",
+        ["Haunted Tomb"] = "Tangled",
+        ["Stonewood Hollow"] = "Bloodstained",
+    };
+
+    /// <summary>Biome name -> fossil pool (per poedb biome-fossil table).</summary>
+    private static readonly Dictionary<string, string[]> BiomeFossils = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Mines"] = new[] { "Metallic", "Serrated", "Pristine", "Aetheric" },
+        ["Fungal Caverns"] = new[] { "Dense", "Aberrant", "Perfect", "Corroded", "Gilded" },
+        ["Petrified Forest"] = new[] { "Bound", "Jagged", "Corroded", "Sanctified" },
+        ["Abyssal Depths"] = new[] { "Aberrant", "Bound", "Gilded", "Lucent" },
+        ["Frozen Hollow"] = new[] { "Frigid", "Serrated", "Prismatic", "Sanctified", "Shuddering" },
+        ["Magma Fissure"] = new[] { "Scorched", "Prismatic", "Pristine", "Deft", "Fundamental", "Faceted" },
+        ["Sulphur Vents"] = new[] { "Metallic", "Perfect", "Aetheric", "Fundamental" },
+    };
+
+    /// <summary>Guaranteed exclusive fossil for a node name, or null if it has none.</summary>
+    public static string ExclusiveFossilOf(string nodeName)
+    {
+        return NodeExclusiveFossil.TryGetValue(nodeName ?? "", out var f) ? f : null;
+    }
+
+    /// <summary>Fossil pool of a biome (empty array if the biome has no common fossils).</summary>
+    public static IReadOnlyList<string> FossilPoolOf(string biome)
+    {
+        return BiomeFossils.TryGetValue(biome ?? "", out var pool) ? pool : Array.Empty<string>();
+    }
 }

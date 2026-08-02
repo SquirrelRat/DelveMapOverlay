@@ -69,6 +69,14 @@ public class DelveMapOverlaySettings : ISettings
     public ToggleNode ShowLayout { get; set; } = new ToggleNode(false);
     public float LayoutThickness { get; set; } = 1.5f;
 
+    // Hidden-path detection: flag nodes with exactly 2 real connections (a 2-connection
+    // node implies a hidden 3rd path behind a fractured wall) and isolated 0-connection
+    // hidden nodes. On by default.
+    public ToggleNode ShowHiddenPathHints { get; set; } = new ToggleNode(true);
+
+    // Left-side stats panel docked beside the chart (legend, biome summary, node stats).
+    public ToggleNode ShowStatsPanel { get; set; } = new ToggleNode(true);
+
     // Frame inset in pixels (0 = tight around the cell rect).
     public float FrameInset { get; set; } = 0f;
     public float FontScale { get; set; } = 1f;

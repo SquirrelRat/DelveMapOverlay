@@ -167,6 +167,34 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
 
                 Graphics.DrawFrame(frame, frameEnd, color, 2);
 
+                // Hidden-path hints: a node with exactly 2 real connections implies a hidden
+                // 3rd path behind a fractured wall; an isolated real node (0 connections) IS
+                // a hidden node. Both are worth flagging.
+                if (Settings.ShowHiddenPathHints.Value && !c.Completed && !c.IsNothing)
+                {
+                    int conns = 0;
+                    for (int i = 0; i < c.NeighborConnected.Length; i++)
+                        if (c.NeighborConnected[i]) conns++;
+
+                    if (conns == 2)
+                    {
+                        var hint = new SharpDX.Color(1f, 0.6f, 0.1f, 0.9f);
+                        var hc = c.Center;
+                        var r = Math.Min(frameEnd.X - frame.X, frameEnd.Y - frame.Y) * 0.45f;
+                        Graphics.DrawCircle(hc, r, hint);
+                    }
+                    else if (conns == 0)
+                    {
+                        var pulse = (float)(DateTime.UtcNow.TimeOfDay.TotalSeconds * 1.5f % 1f);
+                        var alpha = 0.5f + 0.5f * (pulse < 0.5f ? pulse * 2f : 1f - (pulse - 0.5f) * 2f);
+                        var hint = new SharpDX.Color(1f, 0.3f, 0.9f, alpha);
+                        var hc = c.Center;
+                        var r = Math.Min(frameEnd.X - frame.X, frameEnd.Y - frame.Y) * 0.5f;
+                        Graphics.DrawCircle(hc, r, hint);
+                        Graphics.DrawCircle(hc, r * 0.6f, hint);
+                    }
+                }
+
                 // Awareness effect: high-weight rewards get a travelling white snake
                 // comet around the frame.
                 if (weight >= Settings.SnakeThreshold && Settings.SnakeSpeed > 0f)
@@ -251,7 +279,15 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
 
                     if (rewardLine)
                     {
-                        Graphics.DrawTextWithBackground(c.Reward,
+                        // For the 6 exclusive-fossil nodes, show the specific fossil name
+                        // (e.g. "Hollow", "Faceted") instead of the generic "Fossils".
+                        var rewardText = c.Reward;
+                        if (c.Reward == "Fossils")
+                        {
+                            var exFossil = NodeBackbone.ExclusiveFossilOf(c.Feature);
+                            if (exFossil != null) rewardText = exFossil;
+                        }
+                        Graphics.DrawTextWithBackground(rewardText,
                             labelPos + new Vector2(0f, lineH + 2f),
                             new SharpDX.Color(1f, 0.84f, 0f, fade), FontAlign.Center,
                             new SharpDX.Color(0f, 0f, 0f, 0.75f * fade));
@@ -274,6 +310,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             if (Settings.ShowPaths.Value)
                 DrawRewardPaths(cells, mapMin, mapMax);
         }
+
+        if (Settings.ShowStatsPanel.Value)
+            DrawStatsPanel(cells, map);
     }
 
     /// <summary>
@@ -369,28 +408,43 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         // strength; the other reachable nodes of that reward become faint faded hints that
         // only render if MaxPaths still has room. Primaries always beat alternatives, so a
         // far reward's primary is never culled by a near reward's alternatives.
-        var drawList = new List<(int hops, DelveCellReader.Cell cell, bool primary)>();
+        // Ordering uses value x closeness: score = weight / (hops + 1), so a moderately
+        // valuable reward 2 hops away beats a trash reward 1 hop away.
+        float Score(DelveCellReader.Cell cell, int hops)
+        {
+            var w = 0f;
+            if (Settings.RewardFilters.TryGetValue(cell.Reward ?? "", out var srf)) w = srf.Weight;
+            return w / (hops + 1);
+        }
+
+        var drawList = new List<(int hops, DelveCellReader.Cell cell, bool primary, float score)>();
         if (Settings.NearestOnly)
         {
             foreach (var g in targetList.GroupBy(kv => kv.Value.Reward ?? ""))
             {
-                var best = g.OrderBy(kv => kv.Key).ThenBy(kv => kv.Value.Feature).First();
-                drawList.Add((best.Key, best.Value, true));
+                var best = g.OrderByDescending(kv => Score(kv.Value, kv.Key))
+                    .ThenBy(kv => kv.Key).ThenBy(kv => kv.Value.Feature).First();
+                drawList.Add((best.Key, best.Value, true, Score(best.Value, best.Key)));
                 foreach (var kv in g.Where(kv => kv.Value.Address != best.Value.Address))
-                    drawList.Add((kv.Key, kv.Value, false));
+                    drawList.Add((kv.Key, kv.Value, false, Score(kv.Value, kv.Key)));
             }
-            drawList = drawList.OrderBy(d => d.primary ? 0 : 1).ThenBy(d => d.hops).ToList();
+            drawList = drawList
+                .OrderByDescending(d => d.primary)
+                .ThenByDescending(d => d.score)
+                .ToList();
         }
         else
         {
-            drawList = targetList.OrderBy(kv => kv.Key)
-                .Select(kv => (kv.Key, kv.Value, true)).ToList();
+            drawList = targetList
+                .OrderByDescending(kv => Score(kv.Value, kv.Key))
+                .ThenBy(kv => kv.Key)
+                .Select(kv => (kv.Key, kv.Value, true, Score(kv.Value, kv.Key))).ToList();
         }
 
         var altFade = Math.Max(0.02f, Settings.AlternativeFade);
         int maxPaths = Math.Max(1, Settings.MaxPaths);
         int drawn = 0;
-        foreach (var (hops, target, primary) in drawList)
+        foreach (var (hops, target, primary, score) in drawList)
         {
             if (drawn >= maxPaths) break;
             drawn++;
@@ -442,6 +496,79 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         sz = Graphics.MeasureText(text);
         _textSizeCache[text] = sz;
         return sz;
+    }
+
+    /// <summary>
+    /// Stats panel docked to the left edge of the chart. Shows a color legend, the biome
+    /// summary with fossil pools, and counts of the current mine's nodes.
+    /// </summary>
+    private void DrawStatsPanel(List<DelveCellReader.Cell> cells, SharpDX.RectangleF map)
+    {
+        const float width = 260f;
+        var pos = new Vector2(map.X - width - 8f, map.Y);
+        ImGui.SetNextWindowPos(pos);
+        ImGui.SetNextWindowSize(new Vector2(width, 0f));
+        ImGui.Begin("Delve Stats", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
+
+        // Legend: enabled rewards with their colors.
+        if (ImGui.CollapsingHeader("Legend", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            var rewards = NodeBackbone.AllRewards.Count > 0 ? NodeBackbone.AllRewards : NodeBackbone.DefaultRewards;
+            var dl = ImGui.GetWindowDrawList();
+            foreach (var reward in rewards)
+            {
+                if (!Settings.RewardFilters.TryGetValue(reward, out var rf) || !rf.Enabled) continue;
+                var color = ApplyWeight(NodeBaseColor(reward, rf), rf.Weight);
+                var start = ImGui.GetCursorScreenPos();
+                dl.AddRectFilled(new Vector2(start.X, start.Y + 1),
+                    new Vector2(start.X + 10, start.Y + 11), ToU32(color));
+                ImGui.SetCursorScreenPos(new Vector2(start.X + 15, start.Y));
+                ImGui.TextUnformatted(reward);
+            }
+        }
+
+        // Node stats: counts by state.
+        if (ImGui.CollapsingHeader("Nodes", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            int completed = 0, open = 0, hidden2 = 0, hidden0 = 0, nothing = 0;
+            foreach (var c in cells)
+            {
+                if (c.Completed) { completed++; continue; }
+                if (c.IsNothing) { nothing++; continue; }
+                int conns = 0;
+                for (int i = 0; i < c.NeighborConnected.Length; i++)
+                    if (c.NeighborConnected[i]) conns++;
+                if (conns == 2) hidden2++;
+                else if (conns == 0) hidden0++;
+                else open++;
+            }
+            ImGui.TextUnformatted($"Completed (done line): {completed}");
+            ImGui.TextUnformatted($"Open: {open}");
+            ImGui.TextUnformatted($"Hidden-path likely (2 links): {hidden2}");
+            ImGui.TextUnformatted($"Isolated hidden nodes: {hidden0}");
+            ImGui.TextUnformatted($"Empty/fogged: {nothing}");
+        }
+
+        // Biome summary: which biomes are present and what fossils they offer.
+        if (ImGui.CollapsingHeader("Biomes", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            var byBiome = cells
+                .Where(c => !c.IsNothing && !string.IsNullOrEmpty(c.Biome))
+                .GroupBy(c => c.Biome)
+                .OrderByDescending(g => g.Count());
+            foreach (var g in byBiome)
+            {
+                ImGui.TextUnformatted($"{g.Key}: {g.Count()}");
+                var pool = NodeBackbone.FossilPoolOf(g.Key);
+                if (pool.Count > 0)
+                {
+                    ImGui.SameLine();
+                    ImGui.TextDisabled(string.Join(", ", pool));
+                }
+            }
+        }
+
+        ImGui.End();
     }
 
     /// <summary>
@@ -752,6 +879,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             var showPaths = Settings.ShowHiddenPaths.Value;
             if (ImGui.Checkbox("Show hidden paths (walls)", ref showPaths)) Settings.ShowHiddenPaths.Value = showPaths;
 
+            var showHints = Settings.ShowHiddenPathHints.Value;
+            if (ImGui.Checkbox("Flag hidden-path nodes (2 links / isolated)", ref showHints)) Settings.ShowHiddenPathHints.Value = showHints;
+
             if (Settings.ShowHiddenPaths.Value)
             {
                 var col = Settings.HiddenPathColor;
@@ -784,6 +914,12 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             if (ImGui.SliderFloat("Align offset Y", ref oy, -40f, 40f)) Settings.OffsetY = oy;
         }
 
+        if (ImGui.CollapsingHeader("Stats panel"))
+        {
+            var showStats = Settings.ShowStatsPanel.Value;
+            if (ImGui.Checkbox("Show stats panel (legend, biomes, node counts)", ref showStats)) Settings.ShowStatsPanel.Value = showStats;
+        }
+
         if (ImGui.CollapsingHeader("Weight visuals"))
         {
             var wos = Settings.WeightOpacityStrength;
@@ -813,6 +949,49 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             ImGui.TextUnformatted($"Chart open: {_chartOpen}");
             ImGui.TextDisabled("Diagnostic info. Not needed for normal use.");
         }
+
+        if (ImGui.CollapsingHeader("Dump", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            if (ImGui.Button("Dump current mine to file"))
+            {
+                try { DumpMine(); }
+                catch (Exception ex) { LogError($"Dump failed: {ex.Message}"); }
+            }
+            ImGui.TextDisabled("Writes the current mine (nodes, rewards, positions, connections) to a JSON file.");
+        }
+    }
+
+    private void DumpMine()
+    {
+        List<DelveCellReader.Cell> cells;
+        lock (_sync) { cells = _cells; }
+
+        var dir = @"F:\PoE\PoE-DEV\DelveMap\dumps";
+        System.IO.Directory.CreateDirectory(dir);
+        var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        var path = System.IO.Path.Combine(dir, $"mine_{stamp}.json");
+
+        var rows = cells.Select(c => new
+        {
+            Feature = c.Feature,
+            FeatureId = c.FeatureId,
+            Biome = c.Biome,
+            Reward = c.Reward,
+            Tier = c.Tier,
+            Completed = c.Completed,
+            X = c.Rect.X,
+            Y = c.Rect.Y,
+            W = c.Rect.Z,
+            H = c.Rect.W,
+            Neighbors = Enumerable.Range(0, 4)
+                .Where(i => c.NeighborConnected[i])
+                .Select(i => c.NeighborFeatures[i])
+                .ToArray(),
+        }).ToList();
+
+        var json = Newtonsoft.Json.JsonConvert.SerializeObject(rows, Newtonsoft.Json.Formatting.Indented);
+        System.IO.File.WriteAllText(path, json);
+        LogMessage($"Dumped {rows.Count} cells to {path}", 4f);
     }
 
     // ---------------------------------------------------------------- color helpers

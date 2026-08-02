@@ -61,7 +61,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         nf.SelectedTiers.Clear();
         nf.SelectedTiers.AddRange(NodeBackbone.AllTiersOf(reward));
         nf.TierWeights = NodeBackbone.DefaultTierWeights(reward);
-        nf.PathEnabled = false;
+        nf.PathEnabled = NodeBackbone.IsChaseReward(reward);
     }
 
     public override Job Tick()
@@ -166,34 +166,6 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
                 var color = ApplyWeightWithOpacity(NodeBaseColor(c.Reward, rf), weight, Settings.WeightOpacityStrength);
 
                 Graphics.DrawFrame(frame, frameEnd, color, 2);
-
-                // Hidden-path hints: a node with exactly 2 real connections implies a hidden
-                // 3rd path behind a fractured wall; an isolated real node (0 connections) IS
-                // a hidden node. Both are worth flagging.
-                if (Settings.ShowHiddenPathHints.Value && !c.Completed && !c.IsNothing)
-                {
-                    int conns = 0;
-                    for (int i = 0; i < c.NeighborConnected.Length; i++)
-                        if (c.NeighborConnected[i]) conns++;
-
-                    if (conns == 2)
-                    {
-                        var hint = new SharpDX.Color(1f, 0.6f, 0.1f, 0.9f);
-                        var hc = c.Center;
-                        var r = Math.Min(frameEnd.X - frame.X, frameEnd.Y - frame.Y) * 0.45f;
-                        Graphics.DrawCircle(hc, r, hint);
-                    }
-                    else if (conns == 0)
-                    {
-                        var pulse = (float)(DateTime.UtcNow.TimeOfDay.TotalSeconds * 1.5f % 1f);
-                        var alpha = 0.5f + 0.5f * (pulse < 0.5f ? pulse * 2f : 1f - (pulse - 0.5f) * 2f);
-                        var hint = new SharpDX.Color(1f, 0.3f, 0.9f, alpha);
-                        var hc = c.Center;
-                        var r = Math.Min(frameEnd.X - frame.X, frameEnd.Y - frame.Y) * 0.5f;
-                        Graphics.DrawCircle(hc, r, hint);
-                        Graphics.DrawCircle(hc, r * 0.6f, hint);
-                    }
-                }
 
                 // Awareness effect: high-weight rewards get a travelling white snake
                 // comet around the frame.
@@ -403,13 +375,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         var pathColorSd = new SharpDX.Color(pc.X, pc.Y, pc.Z, pc.W);
         float th = Math.Max(1f, Settings.PathThickness);
 
-        // Build the ordered draw list. In "nearest only" mode every enabled reward
-        // contributes one primary (its closest reachable target), drawn first at full
-        // strength; the other reachable nodes of that reward become faint faded hints that
-        // only render if MaxPaths still has room. Primaries always beat alternatives, so a
-        // far reward's primary is never culled by a near reward's alternatives.
-        // Ordering uses value x closeness: score = weight / (hops + 1), so a moderately
-        // valuable reward 2 hops away beats a trash reward 1 hop away.
+        // Build the ordered draw list. Ordering uses value x closeness: score = weight /
+        // (hops + 1), so a moderately valuable reward 2 hops away beats a trash reward 1 hop
+        // away. All reachable PathEnabled targets draw (capped by MaxPaths).
         float Score(DelveCellReader.Cell cell, int hops)
         {
             var w = 0f;
@@ -417,31 +385,11 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             return w / (hops + 1);
         }
 
-        var drawList = new List<(int hops, DelveCellReader.Cell cell, bool primary, float score)>();
-        if (Settings.NearestOnly)
-        {
-            foreach (var g in targetList.GroupBy(kv => kv.Value.Reward ?? ""))
-            {
-                var best = g.OrderByDescending(kv => Score(kv.Value, kv.Key))
-                    .ThenBy(kv => kv.Key).ThenBy(kv => kv.Value.Feature).First();
-                drawList.Add((best.Key, best.Value, true, Score(best.Value, best.Key)));
-                foreach (var kv in g.Where(kv => kv.Value.Address != best.Value.Address))
-                    drawList.Add((kv.Key, kv.Value, false, Score(kv.Value, kv.Key)));
-            }
-            drawList = drawList
-                .OrderByDescending(d => d.primary)
-                .ThenByDescending(d => d.score)
-                .ToList();
-        }
-        else
-        {
-            drawList = targetList
-                .OrderByDescending(kv => Score(kv.Value, kv.Key))
-                .ThenBy(kv => kv.Key)
-                .Select(kv => (kv.Key, kv.Value, true, Score(kv.Value, kv.Key))).ToList();
-        }
+        var drawList = targetList
+            .OrderByDescending(kv => Score(kv.Value, kv.Key))
+            .ThenBy(kv => kv.Key)
+            .Select(kv => (kv.Key, kv.Value, true, Score(kv.Value, kv.Key))).ToList();
 
-        var altFade = Math.Max(0.02f, Settings.AlternativeFade);
         int maxPaths = Math.Max(1, Settings.MaxPaths);
         int drawn = 0;
         foreach (var (hops, target, primary, score) in drawList)
@@ -459,15 +407,8 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             }
             pts.Reverse();
 
-            // Path color: full strength for primaries, faded for alternatives.
-            var alpha = primary ? 1f : altFade;
-            var pathCol = new SharpDX.Color(pathColorSd.R, pathColorSd.G, pathColorSd.B, pathColorSd.A * alpha);
-
             for (int i = 0; i + 1 < pts.Count; i++)
-                Graphics.DrawLine(pts[i], pts[i + 1], th, pathCol);
-
-            // Only primaries pulse and get a hop-count stamp; alternatives stay silent.
-            if (!primary) continue;
+                Graphics.DrawLine(pts[i], pts[i + 1], th, pathColorSd);
 
             var tCenter = target.Center;
             var pulseColor = pathColorSd;
@@ -510,20 +451,24 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         ImGui.SetNextWindowSize(new Vector2(width, 0f));
         ImGui.Begin("Delve Stats", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
 
-        // Legend: enabled rewards with their colors.
-        if (ImGui.CollapsingHeader("Legend", ImGuiTreeNodeFlags.DefaultOpen))
+        // Node counts by reward type (only for enabled rewards, sorted by count desc).
+        if (ImGui.CollapsingHeader("Nodes by type", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            var rewards = NodeBackbone.AllRewards.Count > 0 ? NodeBackbone.AllRewards : NodeBackbone.DefaultRewards;
+            var byReward = cells
+                .Where(c => !c.IsNothing && !c.Completed)
+                .GroupBy(c => c.Reward ?? "?")
+                .OrderByDescending(g => g.Count());
             var dl = ImGui.GetWindowDrawList();
-            foreach (var reward in rewards)
+            foreach (var g in byReward)
             {
-                if (!Settings.RewardFilters.TryGetValue(reward, out var rf) || !rf.Enabled) continue;
-                var color = ApplyWeight(NodeBaseColor(reward, rf), rf.Weight);
+                var rf = Settings.RewardFilters.TryGetValue(g.Key, out var r) ? r : null;
+                if (rf == null || !rf.Enabled) continue;
+                var color = ApplyWeight(NodeBaseColor(g.Key, rf), rf.Weight);
                 var start = ImGui.GetCursorScreenPos();
                 dl.AddRectFilled(new Vector2(start.X, start.Y + 1),
                     new Vector2(start.X + 10, start.Y + 11), ToU32(color));
                 ImGui.SetCursorScreenPos(new Vector2(start.X + 15, start.Y));
-                ImGui.TextUnformatted(reward);
+                ImGui.TextUnformatted($"{g.Key} x {g.Count()}");
             }
         }
 
@@ -852,15 +797,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
                     if (ImGui.SliderFloat("Pulse speed", ref pulseSpeed, 0.5f, 6f)) Settings.PathPulseSpeed = pulseSpeed;
                 }
 
-                var nearest = Settings.NearestOnly.Value;
-                if (ImGui.Checkbox("Nearest only (fade other paths)", ref nearest)) Settings.NearestOnly.Value = nearest;
-                if (Settings.NearestOnly.Value)
-                {
-                    var altFade = Settings.AlternativeFade;
-                    if (ImGui.SliderFloat("Alternative path fade", ref altFade, 0.02f, 0.5f)) Settings.AlternativeFade = altFade;
-                }
-
-                ImGui.TextDisabled("Enable \"Pathfind to this reward\" per reward in the Rewards tab.");
+                ImGui.TextDisabled("Paths draw for rewards with \"Pathfind\" enabled in the Rewards tab.");
             }
 
             ImGui.Spacing();
@@ -878,9 +815,6 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         {
             var showPaths = Settings.ShowHiddenPaths.Value;
             if (ImGui.Checkbox("Show hidden paths (walls)", ref showPaths)) Settings.ShowHiddenPaths.Value = showPaths;
-
-            var showHints = Settings.ShowHiddenPathHints.Value;
-            if (ImGui.Checkbox("Flag hidden-path nodes (2 links / isolated)", ref showHints)) Settings.ShowHiddenPathHints.Value = showHints;
 
             if (Settings.ShowHiddenPaths.Value)
             {

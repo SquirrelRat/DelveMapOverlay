@@ -58,23 +58,12 @@ public class DelveMapOverlaySettings : ISettings
     public bool PathPulse { get; set; } = true;   // pulse the target frame
     public float PathPulseSpeed { get; set; } = 0.5f;
 
-    // When on, each enabled reward draws only its closest reachable target as the primary
-    // (pulsed) path; other reachable nodes of that reward render as faint faded hints.
-    // When off, all reachable targets draw at full strength (capped by MaxPaths).
-    public ToggleNode NearestOnly { get; set; } = new ToggleNode(true);
-    public float AlternativeFade { get; set; } = 0.12f; // alpha for faded alternative paths
-
     // Show the mine layout: every real connection line between nodes, including those
     // behind the fog. This is the full structure of the current mine network.
     public ToggleNode ShowLayout { get; set; } = new ToggleNode(false);
     public float LayoutThickness { get; set; } = 1.5f;
 
-    // Hidden-path detection: flag nodes with exactly 2 real connections (a 2-connection
-    // node implies a hidden 3rd path behind a fractured wall) and isolated 0-connection
-    // hidden nodes. On by default.
-    public ToggleNode ShowHiddenPathHints { get; set; } = new ToggleNode(true);
-
-    // Left-side stats panel docked beside the chart (legend, biome summary, node stats).
+    // Left-side stats panel docked beside the chart (node counts, biome summary).
     public ToggleNode ShowStatsPanel { get; set; } = new ToggleNode(true);
 
     // Frame inset in pixels (0 = tight around the cell rect).

@@ -1,0 +1,999 @@
+{
+  "Abandoned Amplifier": {
+    "biome": [
+      "Mines"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Gems",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": null,
+    "portal": null,
+    "boss": null
+  },
+  "Abandoned Camp": {
+    "biome": [
+      "Mines"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": null,
+    "portal": null,
+    "boss": null
+  },
+  "Abyssal Chamber": {
+    "biome": [
+      "Abyssal City"
+    ],
+    "contents": [
+      "Unknown"
+    ],
+    "tierMin": 1,
+    "tierMax": 4,
+    "minDepth": 71,
+    "portal": "Abyssal Chamber",
+    "boss": null
+  },
+  "Azurite Cavity": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Azurite"
+    ],
+    "tierMin": 0,
+    "tierMax": 1,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Azurite Fissure": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Azurite"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Azurite Vault": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Azurite"
+    ],
+    "tierMin": 1,
+    "tierMax": 2,
+    "minDepth": 20,
+    "portal": null,
+    "boss": null
+  },
+  "Beast Burrow": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Minion or Aura Items",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Brinerot Base": {
+    "biome": [
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Lightning Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 36,
+    "portal": null,
+    "boss": null
+  },
+  "Brinerot Retreat": {
+    "biome": [
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Lightning Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 50,
+    "portal": null,
+    "boss": null
+  },
+  "Buried Camp": {
+    "biome": [
+      "Mines"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Gems",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": null,
+    "portal": null,
+    "boss": null
+  },
+  "Buried Monolith": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "a Legion Encounter"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Crystal Spire": {
+    "biome": [
+      "Abyssal Depths"
+    ],
+    "contents": [
+      "Fossils"
+    ],
+    "tierMin": 4,
+    "tierMax": 4,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Dust Vents": {
+    "biome": [
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Currency",
+      "Jewellery",
+      "Maps"
+    ],
+    "tierMin": 1,
+    "tierMax": 4,
+    "minDepth": 36,
+    "portal": null,
+    "boss": null
+  },
+  "Dusty Chamber": {
+    "biome": [
+      "Mines"
+    ],
+    "contents": [
+      "Currency",
+      "Jewellery"
+    ],
+    "tierMin": 1,
+    "tierMax": 3,
+    "minDepth": null,
+    "portal": null,
+    "boss": null
+  },
+  "Dusty Grove": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Currency",
+      "Jewellery",
+      "Maps"
+    ],
+    "tierMin": 1,
+    "tierMax": 4,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Echoing Lair": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Animalistic Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 50,
+    "portal": null,
+    "boss": null
+  },
+  "Frigid Recess": {
+    "biome": [
+      "Frozen Hollow"
+    ],
+    "contents": [
+      "Armour",
+      "Cold Items",
+      "Currency",
+      "Essences",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 16,
+    "portal": null,
+    "boss": null
+  },
+  "Frozen Grave": {
+    "biome": [
+      "Frozen Hollow"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Gems",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 16,
+    "portal": null,
+    "boss": null
+  },
+  "Grim Copse": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Minion or Aura Items"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Growling Den": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Growling Grove": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Haunted Remains": {
+    "biome": [
+      "Abyssal Depths"
+    ],
+    "contents": [
+      "Abyss Items",
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Mana or Curse Items",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 42,
+    "portal": null,
+    "boss": null
+  },
+  "Haunted Tomb": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Fossils"
+    ],
+    "tierMin": 4,
+    "tierMax": 4,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Howling Den": {
+    "biome": [
+      "Frozen Hollow"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Gems",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 16,
+    "portal": null,
+    "boss": null
+  },
+  "Humid Fissure": {
+    "biome": [
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Fossils"
+    ],
+    "tierMin": 4,
+    "tierMax": 4,
+    "minDepth": 36,
+    "portal": null,
+    "boss": null
+  },
+  "Humid Hive": {
+    "biome": [
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 36,
+    "portal": null,
+    "boss": null
+  },
+  "Infested Thicket": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Infested Warren": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Inhospitable Camp": {
+    "biome": [
+      "Frozen Hollow"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 16,
+    "portal": null,
+    "boss": null
+  },
+  "Lifeless Camp": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Molten Cavity": {
+    "biome": [
+      "Magma Fissure"
+    ],
+    "contents": [
+      "Fossils"
+    ],
+    "tierMin": 4,
+    "tierMax": 4,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Mouldy Camp": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Musty Grave": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Gems",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Mutewind Base": {
+    "biome": [
+      "Frozen Hollow"
+    ],
+    "contents": [
+      "Cold Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Mutewind Retreat": {
+    "biome": [
+      "Frozen Hollow"
+    ],
+    "contents": [
+      "Cold Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 50,
+    "portal": null,
+    "boss": null
+  },
+  "Necromancer's Excavation": {
+    "biome": [
+      "Abyssal Depths",
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Minion or Aura Items"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Nesting Grounds": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Physical Items",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Primeval Chamber": {
+    "biome": [
+      "Primeval Ruins"
+    ],
+    "contents": [
+      "Unknown"
+    ],
+    "tierMin": 1,
+    "tierMax": 4,
+    "minDepth": 111,
+    "portal": "Primeval Chamber",
+    "boss": null
+  },
+  "Pulsating Grotto": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Monsters from Beyond"
+    ],
+    "tierMin": 2,
+    "tierMax": 2,
+    "minDepth": 10,
+    "portal": null,
+    "boss": null
+  },
+  "Ravaged Camp": {
+    "biome": [
+      "Abyssal Depths"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 11,
+    "portal": null,
+    "boss": null
+  },
+  "Redblade Base": {
+    "biome": [
+      "Magma Fissure"
+    ],
+    "contents": [
+      "Fire Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Redblade Retreat": {
+    "biome": [
+      "Magma Fissure"
+    ],
+    "contents": [
+      "Fire Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 50,
+    "portal": null,
+    "boss": null
+  },
+  "Renegade Camp": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Chaos Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Restless Rubble": {
+    "biome": [
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Chaos Items",
+      "Cold Items",
+      "Fire Items",
+      "Gems",
+      "Items",
+      "Lightning Items"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Ringing Cavern": {
+    "biome": [
+      "Mines"
+    ],
+    "contents": [
+      "Armour",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 2,
+    "minDepth": null,
+    "portal": null,
+    "boss": null
+  },
+  "Ritual Grounds": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Talismans"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Ruined Chamber": {
+    "biome": [
+      "Vaal Outpost"
+    ],
+    "contents": [
+      "Unknown"
+    ],
+    "tierMin": 1,
+    "tierMax": 4,
+    "minDepth": 33,
+    "portal": "Vaal Ruined Chamber",
+    "boss": null
+  },
+  "Singed Camp": {
+    "biome": [
+      "Magma Fissure"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 21,
+    "portal": null,
+    "boss": null
+  },
+  "Slumbering Boulders": {
+    "biome": [
+      "Fungal Caverns"
+    ],
+    "contents": [
+      "Currency",
+      "Gems",
+      "Items",
+      "Jewellery"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Smoldering Grave": {
+    "biome": [
+      "Magma Fissure"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Gems",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 21,
+    "portal": null,
+    "boss": null
+  },
+  "Smuggler's Stash": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Armour",
+      "Fossils",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Stonewood Hollow": {
+    "biome": [
+      "Petrified Forest"
+    ],
+    "contents": [
+      "Fossils"
+    ],
+    "tierMin": 4,
+    "tierMax": 4,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Sweltering Burrow": {
+    "biome": [
+      "Magma Fissure"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Fire Items",
+      "Items",
+      "Jewellery",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": 21,
+    "portal": null,
+    "boss": null
+  },
+  "The Crystal King's Throne": {
+    "biome": [
+      "Primeval Ruins"
+    ],
+    "contents": [
+      "Unknown"
+    ],
+    "tierMin": 2,
+    "tierMax": 4,
+    "minDepth": 130,
+    "portal": "Primeval Citadel",
+    "boss": "Aul, the Crystal King"
+  },
+  "The Grand Architect's Temple": {
+    "biome": [
+      "Vaal Outpost"
+    ],
+    "contents": [
+      "Unknown"
+    ],
+    "tierMin": 2,
+    "tierMax": 4,
+    "minDepth": 50,
+    "portal": "Vaal Nexus",
+    "boss": "Ahuatotli, the Blind"
+  },
+  "The Lich's Tomb": {
+    "biome": [
+      "Abyssal City"
+    ],
+    "contents": [
+      "Unknown"
+    ],
+    "tierMin": 2,
+    "tierMax": 4,
+    "minDepth": 90,
+    "portal": "Abyssal Sanctum",
+    "boss": "Kurgal, the Blackblooded"
+  },
+  "Time-Lost Cavern": {
+    "biome": [
+      "Frozen Hollow"
+    ],
+    "contents": [
+      "Fossils"
+    ],
+    "tierMin": 4,
+    "tierMax": 4,
+    "minDepth": 35,
+    "portal": null,
+    "boss": null
+  },
+  "Underground Stash": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Strongboxes"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 5,
+    "portal": null,
+    "boss": null
+  },
+  "Unspeakable Shrine": {
+    "biome": [
+      "Abyssal Depths"
+    ],
+    "contents": [
+      "Abyss Items"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 50,
+    "portal": null,
+    "boss": null
+  },
+  "Webbed Mineshaft": {
+    "biome": [
+      "Mines"
+    ],
+    "contents": [
+      "Currency",
+      "Items",
+      "Jewellery"
+    ],
+    "tierMin": 0,
+    "tierMax": 3,
+    "minDepth": null,
+    "portal": null,
+    "boss": null
+  },
+  "Whispering Gallery": {
+    "biome": [
+      "Abyssal Depths",
+      "Frozen Hollow",
+      "Fungal Caverns",
+      "Magma Fissure",
+      "Mines",
+      "Petrified Forest",
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "an Unstable Breach"
+    ],
+    "tierMin": 2,
+    "tierMax": 3,
+    "minDepth": 10,
+    "portal": null,
+    "boss": null
+  },
+  "Wretched Camp": {
+    "biome": [
+      "Sulphur Vents"
+    ],
+    "contents": [
+      "Armour",
+      "Currency",
+      "Items",
+      "Jewellery",
+      "Maps",
+      "Weapons"
+    ],
+    "tierMin": 0,
+    "tierMax": 4,
+    "minDepth": 36,
+    "portal": null,
+    "boss": null
+  }
+}

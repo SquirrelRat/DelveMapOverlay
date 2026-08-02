@@ -1,0 +1,6 @@
+## Never upload reverse-engineered offsets
+offsets.md
+
+## Build output
+bin/
+obj/

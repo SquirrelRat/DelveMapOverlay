@@ -1,6 +1,9 @@
 ## Never upload reverse-engineered offsets
 offsets.md
 
+## Internal dev guidelines (not for public repo)
+comment-guidelines.md
+
 ## Build output
 bin/
 obj/

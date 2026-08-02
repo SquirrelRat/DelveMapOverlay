@@ -28,10 +28,7 @@ public static class NodeBackbone
         new Dictionary<string, NodeInfo>();
     public static bool Loaded { get; private set; }
 
-    /// <summary>
-    /// Looks for nodes.json next to the plugin DLL (directory this assembly lives in),
-    /// falling back to the canonical dev path if the shipped copy is missing.
-    /// </summary>
+    /// <summary>Loads nodes.json from the plugin dir, falling back to the dev path.</summary>
     public static bool Load(string pluginDir = null)
     {
         var candidates = new List<string>();
@@ -75,9 +72,8 @@ public static class NodeBackbone
     // -------------------------------------------------------------------------------
 
     /// <summary>
-    /// Maps a feature Id to its reward label. Priority order matters:
-    /// exact/encounter ids first, then suffix matching (most specific first).
-    /// Unknown ids -> "" (no reward).
+    /// Maps a feature Id to its reward label. Exact/encounter ids first, then suffix
+    /// matching (most specific first). Unknown ids -> "" (no reward).
     /// </summary>
     public static string RewardOfId(string id)
     {
@@ -211,10 +207,7 @@ public static class NodeBackbone
             .ToList();
     }
 
-    /// <summary>
-    /// Compact tier range label for a reward (e.g. Azurite -> "T1-3", Chamber -> "T1-4").
-    /// Empty string when the reward has no real tiering.
-    /// </summary>
+    /// <summary>Compact tier range label (e.g. "T1-3"), empty when no real tiering.</summary>
     public static string RewardTierRange(string reward)
     {
         if (string.IsNullOrEmpty(reward)) return "";
@@ -222,10 +215,7 @@ public static class NodeBackbone
         return $"T{tiers[0]}-{tiers[tiers.Count - 1]}";
     }
 
-    /// <summary>
-    /// Rewards that are valuable/distinctive enough to be enabled by default.
-    /// Everything else defaults to disabled in the filter list.
-    /// </summary>
+    /// <summary>Rewards enabled by default in the filter list; everything else is off.</summary>
     private static readonly HashSet<string> ChaseRewards = new(StringComparer.OrdinalIgnoreCase)
     {
         "Boss", "Chamber", "Currency", "Azurite", "Fossils", "Minion/Aura", "Chaos",
@@ -240,10 +230,9 @@ public static class NodeBackbone
     }
 
     /// <summary>
-    /// Default weight per reward (-10..10) used when seeding/ resetting filters.
-    /// Weight drives both saturation and opacity: high = vivid + opaque, low = gray + faint.
-    /// Values are based on community delve farming guides (fossils, bosses, minion/aura and
-    /// mana/curse nodes are top profit; generic weapon/armour loot nodes are trash).
+    /// Default weight per reward (-10..10) used when seeding/resetting filters.
+    /// Based on community delve farming guides: fossils, bosses, minion/aura and mana/curse
+    /// nodes are top profit; generic weapon/armour loot nodes are trash.
     /// </summary>
     private static readonly Dictionary<string, float> DefaultWeights = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -278,19 +267,13 @@ public static class NodeBackbone
         ["Loot"] = -2f,
     };
 
-    /// <summary>
-    /// Default weight for a reward label (0f when unlisted).
-    /// </summary>
     public static float DefaultWeight(string reward)
     {
         if (string.IsNullOrEmpty(reward)) return 0f;
         return DefaultWeights.TryGetValue(reward, out var w) ? w : 0f;
     }
 
-    /// <summary>
-    /// Default per-tier weights for a reward that has real tiering. Azurite tiers ramp
-    /// with depth value: T1 (Cavity) low, T2 (Vault) mid, T3 (Fissure) high.
-    /// </summary>
+    /// <summary>Default per-tier weights for tiered rewards (Azurite: T1 low, T3 high).</summary>
     public static System.Collections.Generic.Dictionary<int, float> DefaultTierWeights(string reward)
     {
         var map = new System.Collections.Generic.Dictionary<int, float>();
@@ -303,7 +286,7 @@ public static class NodeBackbone
         return map;
     }
 
-    /// <summary>All tiers a reward can carry (from live feature Ids), ascending.</summary>
+    /// <summary>All tiers a reward can carry, ascending.</summary>
     public static System.Collections.Generic.List<int> AllTiersOf(string reward)
     {
         if (RewardTiers != null && RewardTiers.TryGetValue(reward, out var set))
@@ -311,10 +294,7 @@ public static class NodeBackbone
         return new System.Collections.Generic.List<int>();
     }
 
-    /// <summary>
-    /// Fallback reward list used to seed filters when the live feature table wasn't
-    /// available at load time. All known reward labels, alphabetical.
-    /// </summary>
+    /// <summary>Fallback reward labels for seeding filters when the live table is unavailable.</summary>
     public static IReadOnlyList<string> DefaultRewards { get; } = new[]
     {
         "Abyss", "Animalistic", "Armour", "Azurite", "Bestiary", "Beyond", "Boss",

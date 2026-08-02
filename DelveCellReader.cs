@@ -54,18 +54,14 @@ public static class DelveCellReader
         // Exact on-screen rect of the node icon (tracks zoom/scroll).
         public Vector4 Rect;
 
-        /// <summary>True for empty/unrevealed corridor or fog cells.</summary>
         public bool IsNothing => string.IsNullOrEmpty(Feature) || Feature == "Nothing";
 
-        /// <summary>Centre of the on-screen rect.</summary>
         public System.Numerics.Vector2 Center =>
             new System.Numerics.Vector2(Rect.X + Rect.Z / 2f, Rect.Y + Rect.W / 2f);
 
-        /// <summary>Frame top-left with inset + alignment offsets applied.</summary>
         public System.Numerics.Vector2 FrameTopLeft(float inset, float ox, float oy) =>
             new System.Numerics.Vector2(Rect.X + inset + ox, Rect.Y + inset + oy);
 
-        /// <summary>Frame bottom-right with inset + alignment offsets applied.</summary>
         public System.Numerics.Vector2 FrameBottomRight(float inset, float ox, float oy) =>
             new System.Numerics.Vector2(Rect.X + Rect.Z - inset + ox, Rect.Y + Rect.W - inset + oy);
     }

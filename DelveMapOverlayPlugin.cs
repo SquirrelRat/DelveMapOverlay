@@ -44,8 +44,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         }
     }
 
-    /// <summary>Create a fresh reward filter with chase-default enable/weight plus,
-    /// for tiered rewards, all tiers selected and default per-tier weights.</summary>
+    /// <summary>Fresh reward filter with chase-default enable/weight and default tiers.</summary>
     private static NodeFilter NewSeededFilter(string reward)
     {
         var nf = new NodeFilter();
@@ -53,7 +52,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         return nf;
     }
 
-    /// <summary>Resets a reward filter to its default enable/weight/tier state.</summary>
+    /// <summary>Restores a reward filter's default enable/weight/tier state.</summary>
     private static void ApplyDefaults(NodeFilter nf, string reward)
     {
         nf.Enabled = NodeBackbone.IsChaseReward(reward);
@@ -136,12 +135,10 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
                     continue;
                 }
 
-                // Reward filter (enabled + weight + tier selection).
                 NodeFilter rf = null;
                 Settings.RewardFilters.TryGetValue(c.Reward ?? "", out rf);
                 if (rf != null && !rf.Enabled) continue;
 
-                // Skip empty/unrevealed ("Nothing") cells unless ShowEmpty is on.
                 var isEmpty = c.IsNothing;
                 if (isEmpty && !Settings.ShowEmpty.Value) continue;
 
@@ -280,9 +277,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
     }
 
     /// <summary>
-    /// BFS from the completed frontier to enabled-reward target cells and draw the paths.
-    /// The frontier = completed cells that have at least one uncompleted neighbor.
-    /// Fogged ("Nothing") cells are never traversed or targeted.
+    /// BFS from the completed frontier to PathEnabled reward cells and draw paths.
+    /// Traverses every cell with a real connection edge (corridor pass-throughs included);
+    /// only real reward nodes are targets.
     /// </summary>
     private void DrawRewardPaths(List<DelveCellReader.Cell> cells, Vector2 mapMin, Vector2 mapMax)
     {
@@ -448,9 +445,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
     }
 
     /// <summary>
-    /// Debug: draw every validated neighbor edge. GREEN = both endpoints are real reward
-    /// nodes; YELLOW = the edge is a corridor passing through a "Nothing" tile (still
-    /// travelable in BFS); dim GRAY = everything else. Lets you see the chart connectivity.
+    /// Draw every real connection edge. GREEN = both endpoints are real nodes; YELLOW =
+    /// corridor passing through a "Nothing" tile (still travelable); GRAY = everything else.
+    /// Reveals the full mine structure, including connections behind the fog.
     /// </summary>
     private void DrawMineLayout(List<DelveCellReader.Cell> cells, Vector2 mapMin, Vector2 mapMax)
     {
@@ -820,10 +817,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
 
     // ---------------------------------------------------------------- color helpers
 
-    /// <summary>
-    /// Effective base color for a reward: the custom color if one is set on the filter,
-    /// otherwise the auto reward color.
-    /// </summary>
+    /// <summary>Effective color: the filter's custom color if set, else the auto reward color.</summary>
     private static SharpDX.Color NodeBaseColor(string reward, NodeFilter rf)
     {
         if (rf?.CustomColor is { } cc)
@@ -873,10 +867,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         }
     }
 
-    /// <summary>
-    /// Weight -10..10 maps to saturation 0..1: -10 = fully desaturated (gray),
-    /// +10 = full saturation. Middle weights give partial desaturation.
-    /// </summary>
+    /// <summary>Weight -10..10 maps to saturation 0..1 (-10 = gray, +10 = full color).</summary>
     private static SharpDX.Color ApplyWeight(SharpDX.Color c, float weight)
     {
         var s = Math.Clamp((weight + 10f) / 20f, 0f, 1f);
@@ -889,9 +880,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
     }
 
     /// <summary>
-    /// Opacity multiplier (0..1) for a weight: -10 fades toward 0.4 alpha, +10 is full
-    /// opacity, scaled by <paramref name="opacityStrength"/> (0 = no opacity effect).
-    /// Shared by frames, labels and their backgrounds so low-weight rewards fade together.
+    /// Opacity multiplier for a weight: -10 fades toward 0.4 alpha, +10 full, scaled by
+    /// <paramref name="opacityStrength"/> (0 = no opacity effect). Shared by frames, labels
+    /// and their backgrounds so low-weight rewards fade together.
     /// </summary>
     private static float OpacityForWeight(float weight, float opacityStrength)
     {
@@ -901,12 +892,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         return 1f + (alpha - 1f) * Math.Clamp(opacityStrength, 0f, 1f);
     }
 
-    /// <summary>
-    /// Applies weight as both saturation AND opacity. Opacity ramps from ~0.4 alpha at
-    /// weight -10 up to full alpha at +10, scaled by <paramref name="opacityStrength"/>
-    /// (0 = no opacity effect, 1 = full fade range). Used for on-map frames so
-    /// low-weight rewards are not only gray but also faint.
-    /// </summary>
+    /// <summary>Weight applied as saturation (via ApplyWeight) AND opacity.</summary>
     private static SharpDX.Color ApplyWeightWithOpacity(SharpDX.Color c, float weight, float opacityStrength)
     {
         var faded = ApplyWeight(c, weight);

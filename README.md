@@ -1,7 +1,6 @@
 # DelveMapOverlay
 
 An ExileCore (ExileAPI) plugin for Path of Exile that overlays the Delve chart to make the mine easier to read and to plan worthwhile routes.
-<img width="570" height="338" alt="image" src="https://github.com/user-attachments/assets/54729df1-5ff4-46d6-858d-0319d743cb09" />
 
 <img width="676" height="768" alt="image" src="https://github.com/user-attachments/assets/ac17bd5a-1c65-4e15-80ef-641b2052d45d" />
 

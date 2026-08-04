@@ -451,6 +451,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         ImGui.SetNextWindowSize(new Vector2(width, 0f));
         ImGui.Begin("Delve Stats", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
 
+        // Word-wrap all text at the window's content edge so nothing is cut off.
+        ImGui.PushTextWrapPos(ImGui.GetWindowContentRegionMax().X);
+
         // Node counts by reward type (only for enabled rewards, sorted by count desc).
         if (ImGui.CollapsingHeader("Nodes by type", ImGuiTreeNodeFlags.DefaultOpen))
         {
@@ -512,6 +515,8 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
                 }
             }
         }
+
+        ImGui.PopTextWrapPos();
 
         ImGui.End();
     }
@@ -641,7 +646,11 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             ImGui.PushID(reward);
 
             bool enabled = rf.Enabled;
-            if (ImGui.Checkbox("##en", ref enabled)) rf.Enabled = enabled;
+            if (ImGui.Checkbox("##en", ref enabled))
+            {
+                rf.Enabled = enabled;
+                if (!enabled) rf.PathEnabled = false;
+            }
 
             ImGui.SameLine();
             if (ImGui.Selectable(reward, _selectedReward == reward)) _selectedReward = reward;
@@ -696,7 +705,11 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         ImGui.Spacing();
 
         bool enabled = rf.Enabled;
-        if (ImGui.Checkbox("Enabled", ref enabled)) rf.Enabled = enabled;
+        if (ImGui.Checkbox("Enabled", ref enabled))
+        {
+            rf.Enabled = enabled;
+            if (!enabled) rf.PathEnabled = false;
+        }
 
         bool pathOn = rf.PathEnabled;
         if (ImGui.Checkbox("Pathfind to this reward", ref pathOn)) rf.PathEnabled = pathOn;

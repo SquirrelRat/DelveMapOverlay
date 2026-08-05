@@ -459,8 +459,14 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         {
             var byReward = cells
                 .Where(c => !c.IsNothing && !c.Completed)
+                .Where(c => {
+                    if (c.Tier <= 0) return true; // rewards sin tiering no se filtran
+                    var rf = Settings.RewardFilters.TryGetValue(c.Reward ?? "", out var r) ? r : null;
+                    return rf != null && rf.SelectedTiers.Contains(c.Tier);
+                })
                 .GroupBy(c => c.Reward ?? "?")
                 .OrderByDescending(g => g.Count());
+
             var dl = ImGui.GetWindowDrawList();
             foreach (var g in byReward)
             {

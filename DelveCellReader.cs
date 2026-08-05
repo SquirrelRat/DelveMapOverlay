@@ -20,6 +20,11 @@ namespace DelveMapOverlay;
 /// </summary>
 public static class DelveCellReader
 {
+    // Remembers the last valid Mine Entrance state-object across reads, so "Completed"
+    // detection doesn't drop out when the entrance scrolls/zooms out of the current
+    // tree-walk (see the "Mark completed" block at the end of ReadCells).
+    private static long _cachedDoneState = 0;
+
     public sealed class Cell
     {
         public long Address;
@@ -192,10 +197,24 @@ public static class DelveCellReader
                 doneState = c.StateObj;
                 break;
             }
+
+        if (doneState != 0)
+        {
+            // Found the entrance this time: refresh the cache.
+            _cachedDoneState = doneState;
+        }
+        else
+        {
+            // Entrance isn't in the current read (scrolled/zoomed out of view):
+            // fall back to the last known value instead of leaving everything unmarked.
+            doneState = _cachedDoneState;
+        }
+
         if (doneState != 0)
             foreach (var c in result)
                 c.Completed = c.StateObj == doneState;
 
         return result;
+
     }
 }

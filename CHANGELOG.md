@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The element-to-cell offset is detected at runtime when the built-in value stops matching, so the chart no longer goes blank after a game update. The Debug tab shows the offset in use and the last scan, with a button to re-detect.
+- Reward paths and the mine layout use the detected offset for neighbor lookups.
+- Smuggler's Stash fossil variants count as Fossils, and Ruined Chambers show up as the Chamber reward.
 - Path lines and target boxes use the target's reward color, so each route reads as one color from line to box.
 - Route lines stop at node frame edges and run through fogged corridor tiles instead of crossing through boxes.
 - Hop counts sit above their target frame and yield to other text instead of printing over it.

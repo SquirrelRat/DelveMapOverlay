@@ -386,7 +386,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             for (int i = 0; i < c.Neighbors.Length; i++)
             {
                 if (!c.NeighborConnected[i]) continue;
-                var nbAddr = c.Neighbors[i] + DelveOffsets.ElementToCell;
+                var nbAddr = c.Neighbors[i] + DelveCellReader.ElementToCell;
                 if (byAddr.TryGetValue(nbAddr, out var nb) && !nb.Completed)
                 {
                     frontier.Add(c);
@@ -408,7 +408,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             for (int i = 0; i < cur.Neighbors.Length; i++)
             {
                 if (!cur.NeighborConnected[i]) continue;
-                var nbAddr = cur.Neighbors[i] + DelveOffsets.ElementToCell;
+                var nbAddr = cur.Neighbors[i] + DelveCellReader.ElementToCell;
                 if (!byAddr.ContainsKey(nbAddr)) continue;
                 if (dist.ContainsKey(nbAddr)) continue;
                 dist[nbAddr] = curDist + 1;
@@ -425,7 +425,7 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
             for (int i = 0; i < c.Neighbors.Length; i++)
             {
                 if (!c.NeighborConnected[i] || c.Neighbors[i] == 0) continue;
-                var nbAddr = c.Neighbors[i] + DelveOffsets.ElementToCell;
+                var nbAddr = c.Neighbors[i] + DelveCellReader.ElementToCell;
                 if (!byAddr.ContainsKey(nbAddr)) continue;
                 long a = c.Address, b = nbAddr;
                 var key = a < b ? (a, b) : (b, a);
@@ -1100,6 +1100,9 @@ public class DelveMapOverlayPlugin : BaseSettingsPlugin<DelveMapOverlaySettings>
         {
             ImGui.TextUnformatted($"Cells: {_cells.Count}");
             ImGui.TextUnformatted($"Chart open: {_chartOpen}");
+            ImGui.TextUnformatted(DelveCellReader.Diagnostics);
+            if (ImGui.Button("Re-detect cell offset"))
+                DelveCellReader.ForceRedetect();
             ImGui.TextDisabled("Diagnostic info. Not needed for normal use.");
         }
 

@@ -5,8 +5,18 @@ namespace DelveMapOverlay;
 /// </summary>
 public static class DelveOffsets
 {
-    /// <summary>Offset from a rendered node element to the native cell base.</summary>
+    /// <summary>
+    /// Offset from a rendered node element to the native cell base. This is only the
+    /// starting value: DelveCellReader re-detects it at runtime when it stops matching.
+    /// </summary>
     public const long ElementToCell = 0xE8;
+
+    /// <summary>Candidate range scanned for ElementToCell when the current value finds no cells.</summary>
+    public const long ScanMin = -0x400;
+    public const long ScanMax = 0x1000;
+
+    /// <summary>Max number of elements read during one offset scan.</summary>
+    public const int ScanElementCap = 4000;
 
     /// <summary>First neighbor link slot (pointer to another cell; bidirectional).</summary>
     public const long CellNeighbor0 = 0x568;

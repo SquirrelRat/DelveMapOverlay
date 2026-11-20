@@ -92,7 +92,9 @@ public static class NodeBackbone
 
         if (id.StartsWith("Azurite", StringComparison.OrdinalIgnoreCase)) return "Azurite";
 
-        if (id.EndsWith("Fossil", StringComparison.OrdinalIgnoreCase)) return "Fossils";
+        // Plural covers the Smuggler's Stash fossil variant (ExilesFossils).
+        if (id.EndsWith("Fossil", StringComparison.OrdinalIgnoreCase) ||
+            id.EndsWith("Fossils", StringComparison.OrdinalIgnoreCase)) return "Fossils";
         if (id.EndsWith("Minions", StringComparison.OrdinalIgnoreCase)) return "Minion/Aura";
         if (id.EndsWith("Talisman", StringComparison.OrdinalIgnoreCase)) return "Talismans";
         if (id.Contains("Essence", StringComparison.OrdinalIgnoreCase)) return "Essences";
@@ -122,7 +124,8 @@ public static class NodeBackbone
         if (id.EndsWith("Trinkets", StringComparison.OrdinalIgnoreCase) ||
             id.EndsWith("Tinkets", StringComparison.OrdinalIgnoreCase)) return "Jewellery";
         if (id.EndsWith("Maps", StringComparison.OrdinalIgnoreCase)) return "Maps";
-        if (id.EndsWith("ChamberTier", StringComparison.OrdinalIgnoreCase)) return "Chamber";
+        // Chamber ids end with the tier digit (VaalChamberTier0..4), so match the stem.
+        if (id.Contains("ChamberTier", StringComparison.OrdinalIgnoreCase)) return "Chamber";
         if (id.EndsWith("Boss", StringComparison.OrdinalIgnoreCase)) return "Boss";
         if (id.StartsWith("Obstruction", StringComparison.OrdinalIgnoreCase)) return "Hidden Path";
         if (id.EndsWith("Generic", StringComparison.OrdinalIgnoreCase)) return "Loot";

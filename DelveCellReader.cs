@@ -71,6 +71,124 @@ public static class DelveCellReader
             new System.Numerics.Vector2(Rect.X + Rect.Z - inset + ox, Rect.Y + Rect.W - inset + oy);
     }
 
+    // Element -> native cell offset currently in use. Starts at the known value and is
+    // re-detected at runtime when it stops matching (it moves with game updates).
+    private static long _elementToCell = DelveOffsets.ElementToCell;
+    private static string _offsetSource = "default";
+    private static string _lastScanInfo = "Last scan: none";
+    private static DateTime _lastScan = DateTime.MinValue;
+    private static volatile bool _forceRedetect;
+
+    /// <summary>
+    /// Element -> cell offset of the last read. Neighbor pointers point to the neighbor's
+    /// element, so add this to them to get the neighbor's cell address.
+    /// </summary>
+    public static long ElementToCell => _elementToCell;
+
+    /// <summary>Human-readable read status for the Debug tab.</summary>
+    public static string Diagnostics { get; private set; } = "No read yet (open the Delve chart).";
+
+    /// <summary>Requests a fresh offset scan on the next read.</summary>
+    public static void ForceRedetect() => _forceRedetect = true;
+
+    private static string FormatOffset(long value) =>
+        value < 0 ? $"-0x{-value:X}" : $"0x{value:X}";
+
+    private static bool IsCellAt(GameController gc, long elemAddr, long elementToCell,
+        Dictionary<long, string> featMap, Dictionary<long, string> bioMap)
+    {
+        long cell = elemAddr + elementToCell;
+        if (!featMap.ContainsKey(gc.Memory.Read<long>(cell + DelveOffsets.CellFeature))) return false;
+        return bioMap.ContainsKey(gc.Memory.Read<long>(cell + DelveOffsets.CellBiome));
+    }
+
+    /// <summary>
+    /// Returns the element -> cell offset to use for this read. Keeps the current offset as
+    /// long as it finds cells; otherwise scans a window of candidate offsets once (throttled)
+    /// and picks the one where most elements carry a valid feature AND biome pointer.
+    /// </summary>
+    private static long ResolveElementToCell(GameController gc, List<ExileCore.PoEMemory.Element> elements,
+        Dictionary<long, string> featMap, Dictionary<long, string> bioMap)
+    {
+        if (!_forceRedetect)
+        {
+            int found = 0;
+            foreach (var elem in elements)
+            {
+                try
+                {
+                    if (IsCellAt(gc, elem.Address, _elementToCell, featMap, bioMap) && ++found >= 3)
+                        return _elementToCell;
+                }
+                catch
+                {
+                    // skip unreadable elements
+                }
+            }
+
+            if ((DateTime.Now - _lastScan).TotalSeconds < 3)
+                return _elementToCell;
+        }
+
+        _forceRedetect = false;
+        _lastScan = DateTime.Now;
+
+        // Read one block per element that covers the feature and biome pointers for every
+        // candidate offset, then test the candidates in-process instead of per memory read.
+        long readStart = DelveOffsets.ScanMin + DelveOffsets.CellFeature;
+        int readLength = (int)(DelveOffsets.ScanMax + DelveOffsets.CellBiome + 8 - readStart);
+        int candidateCount = (int)((DelveOffsets.ScanMax - DelveOffsets.ScanMin) / 8) + 1;
+        var hits = new int[candidateCount];
+        int scanned = 0;
+
+        foreach (var elem in elements)
+        {
+            if (scanned >= DelveOffsets.ScanElementCap) break;
+            byte[] buffer;
+            try
+            {
+                buffer = gc.Memory.ReadBytes(elem.Address + readStart, readLength);
+            }
+            catch
+            {
+                continue;
+            }
+            if (buffer == null || buffer.Length < readLength) continue;
+            scanned++;
+
+            for (int k = 0; k < candidateCount; k++)
+            {
+                long offset = DelveOffsets.ScanMin + k * 8L;
+                int featIndex = (int)(offset + DelveOffsets.CellFeature - readStart);
+                int bioIndex = (int)(offset + DelveOffsets.CellBiome - readStart);
+                if (featMap.ContainsKey(BitConverter.ToInt64(buffer, featIndex)) &&
+                    bioMap.ContainsKey(BitConverter.ToInt64(buffer, bioIndex)))
+                {
+                    hits[k]++;
+                }
+            }
+        }
+
+        int best = -1;
+        for (int k = 0; k < candidateCount; k++)
+            if (best < 0 || hits[k] > hits[best]) best = k;
+
+        if (best >= 0 && hits[best] >= 3)
+        {
+            long detected = DelveOffsets.ScanMin + best * 8L;
+            _offsetSource = detected == DelveOffsets.ElementToCell ? "default, verified" : "auto-detected";
+            _lastScanInfo = $"Last scan: {FormatOffset(detected)} matched {hits[best]} of {scanned} elements";
+            _elementToCell = detected;
+        }
+        else
+        {
+            _offsetSource = "no match";
+            _lastScanInfo = $"Last scan: no offset in {FormatOffset(DelveOffsets.ScanMin)}..{FormatOffset(DelveOffsets.ScanMax)} matched ({scanned} elements)";
+        }
+
+        return _elementToCell;
+    }
+
     public static List<Cell> ReadCells(GameController gc)
     {
         if (gc == null || !gc.InGame) return new List<Cell>();
@@ -103,19 +221,40 @@ public static class DelveCellReader
         if (featMap.Count == 0 || bioMap.Count == 0)
             return new List<Cell>();
 
-        // Tree walk: explored cells with exact screen rects.
-        var result = new List<Cell>();
+        // Tree walk: collect every element of the chart first, then resolve which ones are
+        // cells. The element -> native cell offset moves with game updates, so it is
+        // verified against the walked elements and re-detected when it no longer matches.
+        var elements = new List<ExileCore.PoEMemory.Element>();
         var stack = new Stack<ExileCore.PoEMemory.Element>();
         stack.Push(window);
-        int walked = 0;
-        while (stack.Count > 0 && walked < DelveOffsets.TreeWalkCap)
+        while (stack.Count > 0 && elements.Count < DelveOffsets.TreeWalkCap)
         {
             var elem = stack.Pop();
-            walked++;
+            elements.Add(elem);
+            try
+            {
+                var ch = elem.Children;
+                for (int i = 0; i < ch.Count; i++)
+                    stack.Push(ch[i]);
+            }
+            catch
+            {
+                // skip unreadable elements
+            }
+        }
+
+        long elementToCell = ResolveElementToCell(gc, elements, featMap, bioMap);
+        Diagnostics = $"Features: {featMap.Count}  Biomes: {bioMap.Count}  Elements walked: {elements.Count}\n" +
+                      $"ElementToCell: {FormatOffset(elementToCell)} ({_offsetSource})\n" +
+                      _lastScanInfo;
+
+        var result = new List<Cell>();
+        foreach (var elem in elements)
+        {
             try
             {
                 long elemAddr = elem.Address;
-                long cell = elemAddr + DelveOffsets.ElementToCell;
+                long cell = elemAddr + elementToCell;
                 long featPtr = gc.Memory.Read<long>(cell + DelveOffsets.CellFeature);
                 if (featPtr >= featMin && featPtr <= featMax)
                 {
@@ -159,10 +298,6 @@ public static class DelveCellReader
                         });
                     }
                 }
-
-                var ch = elem.Children;
-                for (int i = 0; i < ch.Count; i++)
-                    stack.Push(ch[i]);
             }
             catch
             {
@@ -179,7 +314,7 @@ public static class DelveCellReader
             for (int i = 0; i < c.Neighbors.Length; i++)
             {
                 if (c.Neighbors[i] == 0) continue;
-                var nbCellAddr = c.Neighbors[i] + DelveOffsets.ElementToCell;
+                var nbCellAddr = c.Neighbors[i] + elementToCell;
                 if (byAddr.TryGetValue(nbCellAddr, out var nb))
                 {
                     c.NeighborRects[i] = nb.Rect;
